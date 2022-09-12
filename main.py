@@ -16,5 +16,4 @@ class MainApp(App):
         gerenciador_telas = self.root.ids["screen_manager"]
         gerenciador_telas.current = id_tela
 
-
 MainApp().run()
