@@ -25,22 +25,22 @@
             source: "icones/foto_perfil.png"
             pos_hint:{'right':0.5, 'top':0.7}
             size_hint: 0.5, 0.15
-            on_release: print('Ir para mudar tela p/ Foto Perfil')
+            on_release: app.mudar_tela("fotoperfilpage")
         LabelButton:
             text: "Mudar Foto de Perfil"
-            on_release: print('Ir para mudar tela p/ Foto Perfil')
+            on_release: app.mudar_tela("fotoperfilpage")
             pos_hint:{'right':0.9, 'top':0.7}
             size_hint: 0.5, 0.15
 
-    # acompanhar vendedor
+    # adicionar vendedor
         ImageButton:
             source: "icones/adicionar_vendedor.png"
             pos_hint:{'right':0.5, 'top':0.5}
             size_hint: 0.5, 0.15
-            on_release: print('Ir para acompanhar vendedor')
+            on_release: app.mudar_tela("adicionarvendedorpage")
         LabelButton:
-            text: "Acompanhar Vendedor"
-            on_release: print('Ir para acompanhar vendedor')
+            text: "Adicionar Vendedor"
+            on_release: app.mudar_tela("adicionarvendedorpage")
             pos_hint:{'right':0.9, 'top':0.5}
             size_hint: 0.5, 0.15
 
@@ -49,10 +49,10 @@
             source: "icones/vendas_empresa.png"
             pos_hint:{'right':0.5, 'top':0.3}
             size_hint: 0.5, 0.15
-            on_release: print('Ir para ver todas as vendas')
+            on_release: app.mudar_tela("todasvendaspage")
         LabelButton:
-            text: "Acompanhar Vendedor"
-            on_release: print('Ir para ver todas as vendas')
+            text: "Todas as Vendas"
+            on_release: app.mudar_tela("todasvendaspage")
             pos_hint:{'right':0.9, 'top':0.3}
             size_hint: 0.5, 0.15
 
