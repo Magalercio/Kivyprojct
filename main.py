@@ -3,6 +3,7 @@ from kivy.lang import Builder
 from telas import *
 from botoes import *
 from bannervenda import BannerVenda
+from bannervendedor import BannerVendedor
 import requests
 import os
 from functools import partial
@@ -50,6 +51,18 @@ class MainApp(App):
             foto_perfil = self.root.ids["foto_perfil"]
             foto_perfil.source = f"icones/fotos_perfil/{avatar}"
 
+            # preencher ID único
+            id_vendedor = requisicao_dic['id_vendedor']
+            pagina_ajustes = self.root.ids["ajustespage"]
+            pagina_ajustes.ids['id_vendedor'].text = f"Seu ID Único: {id_vendedor}"
+
+            # preencher total de vendas
+            total_vendas = requisicao_dic['total_vendas']
+            total_vendas = float(total_vendas)
+            pagina_homepage = self.root.ids["homepage"]
+            pagina_homepage.ids['label_total_vendas'].text = "[color=#000000]Total de Vendas:[/color] [b]R$ {:.2f}[/b]"\
+                .format(total_vendas)
+
             # preencher listas de vendas
             try:
                 vendas = requisicao_dic['vendas'][1:]
@@ -64,6 +77,18 @@ class MainApp(App):
                     lista_vendas.add_widget(banner)
             except:
                 pass
+
+            #preencher equipe de vendedores
+            equipe = requisicao_dic ["equipe"]
+            lista_equipe = equipe.split(",")
+            pagina_listavendedores = self.root.ids["listarvendedorespage"]
+            lista_vendedores = pagina_listavendedores.ids['lista_vendedores']
+
+            for id_vendedor_equipe in lista_equipe:
+                if id_vendedor_equipe != "":
+                    banner_vendedor = BannerVendedor(id_vendedor=id_vendedor_equipe)
+                    lista_vendedores.add_widget(banner_vendedor)
+
             self.mudar_tela("homepage")
         except:
             pass
@@ -73,7 +98,6 @@ class MainApp(App):
         gerenciador_telas.current = id_tela
 
     def mudar_foto_perfil(self, foto, *args):
-        print(f"{foto}")
         foto_perfil = self.root.ids["foto_perfil"]
         foto_perfil.source = f"icones/fotos_perfil/{foto}"
 
