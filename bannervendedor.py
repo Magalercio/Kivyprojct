@@ -21,7 +21,7 @@ class BannerVendedor(FloatLayout):
                f'"{id_vendedor}"'
         requisicao = requests.get(link)
         requisicao_dic = requisicao.json()
-        valor = list(requisicao_dic.values())[0] # coloca indice zero pois vem dentro de uma lista
+        valor = list(requisicao_dic.values())[0]  # coloca indice zero pois vem dentro de uma lista
         avatar = valor['avatar']
         total_vendas = valor['total_vendas']
         total_vendas = float(total_vendas)

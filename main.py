@@ -48,24 +48,31 @@ class MainApp(App):
 
             # preencher foto de perfil
             avatar = requisicao_dic['avatar']
+            self.avatar = avatar
             foto_perfil = self.root.ids["foto_perfil"]
             foto_perfil.source = f"icones/fotos_perfil/{avatar}"
 
             # preencher ID único
             id_vendedor = requisicao_dic['id_vendedor']
+            self.id_vendedor = id_vendedor
             pagina_ajustes = self.root.ids["ajustespage"]
             pagina_ajustes.ids['id_vendedor'].text = f"Seu ID Único: {id_vendedor}"
 
             # preencher total de vendas
             total_vendas = requisicao_dic['total_vendas']
             total_vendas = float(total_vendas)
+            self.total_vendas = total_vendas
             pagina_homepage = self.root.ids["homepage"]
             pagina_homepage.ids['label_total_vendas'].text = "[color=#000000]Total de Vendas:[/color] [b]R$ {:.2f}[/b]"\
                 .format(total_vendas)
 
+            # preencher equipe
+            self.equipe = requisicao_dic["equipe"]
+
             # preencher listas de vendas
             try:
                 vendas = requisicao_dic['vendas'][1:]
+                self.vendas = vendas
                 pagina_homepage = self.root.ids["homepage"]
                 lista_vendas = pagina_homepage.ids["lista_vendas"]
                 for venda in vendas:
@@ -78,7 +85,7 @@ class MainApp(App):
             except:
                 pass
 
-            #preencher equipe de vendedores
+            # preencher equipe de vendedores
             equipe = requisicao_dic ["equipe"]
             lista_equipe = equipe.split(",")
             pagina_listavendedores = self.root.ids["listarvendedorespage"]
@@ -107,5 +114,34 @@ class MainApp(App):
         requisicao = requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json",
                                     data=info)
         self.mudar_tela("ajustespage")
+
+    def adicionar_vendedor(self, id_vendedor_adcionado):
+        link = f'https://aplicativovendaskiv-default-rtdb.firebaseio.com/.json?orderBy="id_vendedor"&equalTo=' \
+               f'"{id_vendedor_adcionado}"'
+        requisicao = requests.get(link)
+        requisicao_dic = requisicao.json()
+
+        pagina_adcionarvendedor = self.root.ids["adicionarvendedorpage"]
+        mensagem_texto = pagina_adcionarvendedor.ids["mensagem_outrovendedor"]
+
+        if requisicao_dic == {}:
+            mensagem_texto.text = "Usuário não encontrado"
+
+        else:
+            equipe = self.equipe.split(",")
+            if id_vendedor_adcionado in equipe:
+                mensagem_texto.text = "Vendedor já faz parte da equipe"
+            else:
+                self.equipe = self.equipe + f",{id_vendedor_adcionado}"
+                info =f'{{"equipe": "{self.equipe}"}}'
+                requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json",
+                               data=info)
+                mensagem_texto.text = "Vendedor Adicionado com Sucesso"
+                # adicionar o novo banner do vendedor recem adicionado
+                pagina_listavendedores = self.root.ids["listarvendedorespage"]
+                lista_vendedores = pagina_listavendedores.ids['lista_vendedores']
+                banner_vendedor = BannerVendedor(id_vendedor=id_vendedor_adcionado)
+                lista_vendedores.add_widget(banner_vendedor)
+
 
 MainApp().run()
