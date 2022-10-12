@@ -105,27 +105,30 @@ class MainApp(App):
             total_vendas = float(total_vendas)
             self.total_vendas = total_vendas
             pagina_homepage = self.root.ids["homepage"]
-            pagina_homepage.ids['label_total_vendas'].text = "[color=#000000]Total de Vendas:[/color] [b]R$ {:.2f}[/b]" \
-                .format(total_vendas)
+            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+
 
             # preencher equipe
             self.equipe = requisicao_dic["equipe"]
 
             # preencher listas de vendas
             try:
-                vendas = requisicao_dic['vendas'][1:]
+                vendas = requisicao_dic['vendas']
                 self.vendas = vendas
                 pagina_homepage = self.root.ids["homepage"]
                 lista_vendas = pagina_homepage.ids["lista_vendas"]
-                for venda in vendas:
+                for id_venda in vendas:
+                    # pegando cada venda dentro do seu id, para arrumar o bug da homepage
+                    venda = vendas[id_venda]
                     banner = BannerVenda(cliente=venda['cliente'], foto_cliente=venda['foto_cliente'],
                                          produto=venda['produto'], foto_produto=venda['foto_produto'],
                                          data=venda['data'], preco=venda['preco'], unidade=venda['unidade'],
                                          quantidade=venda['quantidade'])
 
                     lista_vendas.add_widget(banner)
-            except:
-                pass
+            except Exception as excecao:
+                print (excecao)
+
 
             # preencher equipe de vendedores
             equipe = requisicao_dic["equipe"]
@@ -301,28 +304,49 @@ class MainApp(App):
 
 
 
-            requisicao = requests.get(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}/total_vendas.json")
+            requisicao = requests.get(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}"
+                                      f"/total_vendas.json")
             total_vendas = float(requisicao.json())
             total_vendas += preco
             info=f'{{"total_vendas": "{total_vendas}"}}'
             requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json", data=info)
 
             pagina_homepage = self.root.ids["homepage"]
-            pagina_homepage.ids['label_total_vendas'].text = "[color=#000000]Total de Vendas:[/color] [b]R$ {:.2f}[/b]" \
-                .format(total_vendas)
+            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+
 
             self.mudar_tela("homepage")
-
-
 
         # zerando as variáveis para que não estajam pré selecionadas quando for dar mais de uma entrada.
         self.cliente = None
         self.produto = None
         self.unidade = None
 
+    def limpar_vendas_page(self):
+        self.cliente = None
+        self.produto = None
+        self.unidade = None
+        pagina_adicionarvendas = self.root.ids["adicionarvendaspage"]
+        pagina_adicionarvendas.ids["label_preco"].color = (1, 1, 1, 1)
+        pagina_adicionarvendas.ids["label_quantidade"].color = (1, 1, 1, 1)
+        pagina_adicionarvendas.ids["unidades_kg"].color = (1, 1, 1, 1)
+        pagina_adicionarvendas.ids["unidades_unidades"].color = (1, 1, 1, 1)
+        pagina_adicionarvendas.ids["unidades_litros"].color = (1, 1, 1, 1)
+        pagina_adicionarvendas.ids["label_selecione_produto"].color = (1, 1, 1, 1)
+        lista_produtos = pagina_adicionarvendas.ids["lista_produtos"]
 
+        for item in list(lista_produtos.children):
+            item.color = (1, 1, 1, 1)
+        lista_clientes = pagina_adicionarvendas.ids["lista_clientes"]
+        pagina_adicionarvendas.ids["label_selecione_cliente"].color = (1, 1, 1, 1)
 
+        for item in list(lista_clientes.children):
+            item.color = (1, 1, 1, 1)
 
+        pagina_adicionarvendas.ids["preco_total"].text = ""
+        pagina_adicionarvendas.ids["quantidade"].text = ""
+
+        self.mudar_tela("adicionarvendaspage")
 
 
 MainApp().run()
