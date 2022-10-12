@@ -11,6 +11,7 @@
             pos_hint:{'right':1, 'top':1}
             size_hint: 1, 0.05
             text: "Selecione o Cliente"
+            id: label_selecione_cliente
 
         ScrollView:
 
@@ -22,8 +23,8 @@
 
                 size_hint_x: None
                 width: self.minimum_width
-                column_default_width: "100dp"
-                column_force_default: True
+                col_default_width: "100dp"
+                col_force_default: True
 
     # selecionar produto
         Label:
@@ -31,6 +32,7 @@
             pos_hint:{'right':1, 'top':0.75}
             size_hint: 1, 0.05
             text: "Selecione o Produto"
+            id: label_selecione_produto
 
         ScrollView:
 
@@ -42,8 +44,8 @@
 
                 size_hint_x: None
                 width: self.minimum_width
-                column_default_width: "100dp"
-                column_force_default: True
+                col_default_width: "100dp"
+                col_force_default: True
         Label:
             id: label_data
             pos_hint: {"right": 1, "top": 0.5}
@@ -56,15 +58,18 @@
             rows: 1
             pos_hint: {"right": 0.9, "top": 0.41}
             size_hint: 0.8, 0.01
-            Label:
+            LabelButton:
                 text: "kg"
                 id: unidades_kg
-            Label:
+                on_release: app.selecionar_unidade("unidades_kg")
+            LabelButton:
                 text: "unidades"
                 id: unidades_unidades
-            Label:
+                on_release: app.selecionar_unidade("unidades_unidades")
+            LabelButton:
                 text: "litros"
                 id: unidades_litros
+                on_release: app.selecionar_unidade("unidades_litros")
 
     # Botões
         LabelButton:
@@ -84,7 +89,7 @@
                     pos: self.pos
                     size: self.size
                     source: "icones/botao.png" if self.state == "normal" else "icones/botao_apertado.png"
-            on_release: print("adcionando venda")
+            on_release: app.adicionar_venda()
             text: "Adicionar Venda"
             pos_hint: {"right": 0.95, "top":0.2}
             size_hint: 0.4, 0.2
@@ -96,6 +101,7 @@
             size_hint: 0.8, 0.075
             Label:
                 text: "Preço Total (R$)"
+                id: label_preco
             TextInput:
                 id: preco_total
                 hint_text: "Digite apenas números"
@@ -108,6 +114,7 @@
             size_hint: 0.8, 0.075
             Label:
                 text: "Quantidade Total"
+                id: label_quantidade
             TextInput:
                 id: quantidade
                 hint_text: "0"
