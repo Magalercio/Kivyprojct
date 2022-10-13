@@ -348,5 +348,58 @@ class MainApp(App):
 
         self.mudar_tela("adicionarvendaspage")
 
+    def carregar_todas_vendas(self):
+        # preencher a pagina todas as vendas page
+        pagina_todasvendas = self.root.ids["todasvendaspage"]
+        lista_vendas = pagina_todasvendas.ids["lista_vendas"]
+
+        # Remover todos os itens que já estejam no banner para garantir que não haja duplicata.
+        for item in list(lista_vendas.children):
+            lista_vendas.remove_widget(item)
+
+        # pegar informações das vendas de todos usuários
+        requisicao = requests.get(f'https://aplicativovendaskiv-default-rtdb.firebaseio.com/.json?orderBy="id_vendedor"')
+        requisicao_dic = requisicao.json()
+
+        # preencher foto de perfil da empresa
+        foto_perfil = self.root.ids["foto_perfil"]
+        foto_perfil.source = f"icones/fotos_perfil/hash.png"
+
+        total_vendas = 0
+
+        # preencher total de vendas
+        for local_id_usuario in requisicao_dic:
+            try:
+                vendas = requisicao_dic[local_id_usuario]["vendas"]
+                for id_venda in vendas:
+                    venda = vendas[id_venda]
+                    total_vendas += float(venda["preco"])
+                    banner = BannerVenda(cliente=venda['cliente'], foto_cliente=venda['foto_cliente'],
+                                         produto=venda['produto'], foto_produto=venda['foto_produto'],
+                                         data=venda['data'], preco=venda['preco'], unidade=venda['unidade'],
+                                         quantidade=venda['quantidade'])
+                    lista_vendas.add_widget(banner)
+
+            except Exception as excecao:
+                print(excecao)
+
+        # preencher total de vendas
+
+        pagina_todasvendas.ids[
+            'label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+
+
+        # redirecionar para todas as vendas page
+        self.mudar_tela("todasvendaspage")
+
+    def sair_todas_vendas(self):
+        # recolocar a imagem do usuário
+
+        foto_perfil = self.root.ids["foto_perfil"]
+        foto_perfil.source = f"icones/fotos_perfil/{self.avatar}"
+
+        # voltar para pagina de ajuste
+        self.mudar_tela("ajustespage")
+
 
 MainApp().run()
