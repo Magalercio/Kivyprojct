@@ -85,7 +85,8 @@ class MainApp(App):
             self.id_token = id_token
 
             # pegar informações do usuario
-            requisicao = requests.get(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json")
+            requisicao = requests.get(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}."
+                                      f"json?auth={self.id_token}")
             requisicao_dic = requisicao.json()
 
             # preencher foto de perfil
@@ -105,7 +106,8 @@ class MainApp(App):
             total_vendas = float(total_vendas)
             self.total_vendas = total_vendas
             pagina_homepage = self.root.ids["homepage"]
-            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] " \
+                                                             f"[b]R$ {total_vendas:,.2f}[/b]"
 
 
             # preencher equipe
@@ -156,8 +158,8 @@ class MainApp(App):
         info = f'{{"avatar": "{foto}"}}'  # Chaves esta  dupla para o python entender que é chaves texto,
         # não um valor formatado.
 
-        requisicao = requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json",
-                                    data=info)
+        requisicao = requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json?"
+                                    f"auth={self.id_token}", data=info)
         self.mudar_tela("ajustespage")
 
     def adicionar_vendedor(self, id_vendedor_adcionado):
@@ -179,8 +181,8 @@ class MainApp(App):
             else:
                 self.equipe = self.equipe + f",{id_vendedor_adcionado}"
                 info = f'{{"equipe": "{self.equipe}"}}'
-                requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json",
-                               data=info)
+                requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json"
+                               f"?auth={self.id_token}", data=info)
                 mensagem_texto.text = "Vendedor Adicionado com Sucesso"
                 # adicionar o novo banner do vendedor recem adicionado
                 pagina_listavendedores = self.root.ids["listarvendedorespage"]
@@ -293,8 +295,8 @@ class MainApp(App):
                    f'"foto_produto": "{foto_produto}", "data": "{data}", "unidade": "{unidade}", "preco": "{preco}",' \
                    f' "quantidade": "{quantidade}"}}'
 
-            requests.post(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}/vendas.json",
-                          data= info)
+            requests.post(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}/vendas.json?"
+                          f"auth={self.id_token}", data=info)
 
             banner = BannerVenda(cliente=cliente, produto=produto, foto_cliente=foto_cliente, foto_produto=foto_produto,
                                  data=data, preco=preco, quantidade=quantidade, unidade=unidade)
@@ -305,14 +307,16 @@ class MainApp(App):
 
 
             requisicao = requests.get(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}"
-                                      f"/total_vendas.json")
+                                      f"/total_vendas.json?auth={self.id_token}")
             total_vendas = float(requisicao.json())
             total_vendas += preco
             info=f'{{"total_vendas": "{total_vendas}"}}'
-            requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json", data=info)
+            requests.patch(f"https://aplicativovendaskiv-default-rtdb.firebaseio.com/{self.local_id}.json?auth="
+                           f"{self.id_token}", data=info)
 
             pagina_homepage = self.root.ids["homepage"]
-            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+            pagina_homepage.ids['label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] " \
+                                                             f"[b]R$ {total_vendas:,.2f}[/b]"
 
 
             self.mudar_tela("homepage")
@@ -358,7 +362,8 @@ class MainApp(App):
             lista_vendas.remove_widget(item)
 
         # pegar informações das vendas de todos usuários
-        requisicao = requests.get(f'https://aplicativovendaskiv-default-rtdb.firebaseio.com/.json?orderBy="id_vendedor"')
+        requisicao = requests.get(f'https://aplicativovendaskiv-default-rtdb.firebaseio.com/.json?orderBy='
+                                  f'"id_vendedor"')
         requisicao_dic = requisicao.json()
 
         # preencher foto de perfil da empresa
@@ -392,14 +397,51 @@ class MainApp(App):
         # redirecionar para todas as vendas page
         self.mudar_tela("todasvendaspage")
 
-    def sair_todas_vendas(self):
+    def sair_todas_vendas(self, id_tela):
         # recolocar a imagem do usuário
 
         foto_perfil = self.root.ids["foto_perfil"]
         foto_perfil.source = f"icones/fotos_perfil/{self.avatar}"
 
         # voltar para pagina de ajuste
-        self.mudar_tela("ajustespage")
+        self.mudar_tela(id_tela)
+
+    def carregar_vendas_vendedor(self, dic_info_vendedor, *args):
+
+        # puxar as vendas do vendedor
+
+        pagina_vendasoutrovendedor = self.root.ids["vendasoutrovendedorpage"]
+        try:
+            vendas = dic_info_vendedor["vendas"]
+            lista_vendas = pagina_vendasoutrovendedor.ids["lista_vendas"]
+
+            # Remover todos os itens que já estejam no banner para garantir que não haja duplicata.
+            for item in list(lista_vendas.children):
+                lista_vendas.remove_widget(item)
+
+            for id_venda in vendas:
+                venda = vendas[id_venda]
+                banner = BannerVenda(cliente=venda['cliente'], foto_cliente=venda['foto_cliente'],
+                                     produto=venda['produto'], foto_produto=venda['foto_produto'],
+                                     data=venda['data'], preco=venda['preco'], unidade=venda['unidade'],
+                                     quantidade=venda['quantidade'])
+                lista_vendas.add_widget(banner)
+
+        except Exception as excecao:
+            print(excecao)
+
+        # preencher vendas
+
+        total_vendas = float(dic_info_vendedor["total_vendas"])
+        pagina_vendasoutrovendedor.ids[
+            'label_total_vendas'].text = f"[color=#000000]Total de Vendas:[/color] [b]R$ {total_vendas:,.2f}[/b]"
+
+        # preencher foto de perfil
+        foto_perfil = self.root.ids["foto_perfil"]
+        avatar = dic_info_vendedor["avatar"]
+        foto_perfil.source = f"icones/fotos_perfil/{avatar}"
+
+        self.mudar_tela("vendasoutrovendedorpage")
 
 
 MainApp().run()
