@@ -160,3 +160,4 @@ cython_debug/
 planejamento.txt
 refreshtoken.txt
 security.py
+*.txt
