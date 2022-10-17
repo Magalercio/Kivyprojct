@@ -6,12 +6,14 @@ from bannervenda import BannerVenda
 from bannervendedor import BannerVendedor
 import requests
 import os
+import certifi
 from datetime import date
 from functools import partial
 from myfirebase import MyFirebase
 
-GUI = Builder.load_file("main.kv")  # tem que ficar depois de todas as classes de paginas, para que elas sejam criadas
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
+GUI = Builder.load_file("main.kv")  # tem que ficar depois de todas as classes de paginas, para que elas sejam criadas
 
 # Antes de criar o APP.
 
